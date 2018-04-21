@@ -1,0 +1,63 @@
+package main
+
+import (
+	"errors"
+	"log"
+	"%BOTUSERNAME%/configs"
+	"%BOTUSERNAME%/funcs"
+	"%BOTUSERNAME%/models"
+
+	mgo "gopkg.in/mgo.v2"
+
+	"math/rand"
+	"time"
+
+	goerrors "github.com/go-errors/errors"
+	"github.com/go-telegram-bot-api/telegram-bot-api"
+)
+
+func main() {
+	rand.Seed(time.Now().UTC().UnixNano())
+	bot, err := tgbotapi.NewBotAPI(configs.BOT_TOKEN)
+	if err != nil {
+		log.Panic(err)
+	}
+	bot.Buffer = 10000
+	log.Printf("Authorized on account %s", bot.Self.UserName)
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+	updates, err := bot.GetUpdatesChan(u)
+	session, err := mgo.Dial("localhost")
+	if err != nil {
+		panic(err)
+	}
+	defer session.Close()
+
+	models.DB = session.DB(configs.BOT_USERNAME)
+	models.API = bot
+	app := funcs.%BOTUSERNAME%{}
+
+	for update := range updates {
+		go PanicHandler(update, app.ProcessUpdate)
+	}
+}
+
+func PanicHandler(update tgbotapi.Update, fun func(update tgbotapi.Update)) {
+	var err error
+	//defer wg.Done()
+	defer func() {
+		r := recover()
+		if r != nil {
+			switch t := r.(type) {
+			case string:
+				err = errors.New(t)
+			case error:
+				err = t
+			default:
+				err = errors.New("unknown error")
+			}
+			log.Println(goerrors.Wrap(err, 2).ErrorStack())
+		}
+	}()
+	fun(update)
+}

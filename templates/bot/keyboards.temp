@@ -1,0 +1,57 @@
+package funcs
+
+import (
+	"%BOTUSERNAME%/lang"
+
+	"github.com/go-telegram-bot-api/telegram-bot-api"
+)
+
+func BackKeyboard(lang lang.Language) *tgbotapi.ReplyKeyboardMarkup {
+	rows := [][]string{}
+	firstRow := []string{lang.BackBtnText()}
+	rows = append(rows, firstRow)
+	return MakeReplyKeyboardFromArray(rows)
+}
+
+func MakeReplyKeyboardFromArray(rows ...[][]string) *tgbotapi.ReplyKeyboardMarkup {
+	var keyboardButtons [][]tgbotapi.KeyboardButton
+	var buttonRow []tgbotapi.KeyboardButton
+	for _, row := range rows {
+		for _, buttons := range row {
+			for _, button := range buttons {
+				buttonRow = append(buttonRow, tgbotapi.KeyboardButton{Text: button})
+			}
+			keyboardButtons = append(keyboardButtons, buttonRow)
+			buttonRow = []tgbotapi.KeyboardButton{}
+		}
+	}
+	keyboard := &tgbotapi.ReplyKeyboardMarkup{Keyboard: keyboardButtons, ResizeKeyboard: true}
+	return keyboard
+}
+
+func MakeInlineReplyKeyboardFromArray(rows ...[][]map[string]string) *tgbotapi.InlineKeyboardMarkup {
+	var InlineKeyboardButton [][]tgbotapi.InlineKeyboardButton
+	var keyboardRow []tgbotapi.InlineKeyboardButton
+	for _, row := range rows {
+		for _, buttons := range row {
+			for _, button := range buttons {
+				buttonObj := tgbotapi.InlineKeyboardButton{}
+				if _, ok := button["text"]; ok {
+					buttonObj.Text = button["text"]
+				}
+				if _, ok := button["url"]; ok {
+					str := button["url"]
+					buttonObj.URL = &str
+				}
+				if value, ok := button["data"]; ok {
+					buttonObj.CallbackData = &value
+				}
+				keyboardRow = append(keyboardRow, buttonObj)
+			}
+			InlineKeyboardButton = append(InlineKeyboardButton, keyboardRow)
+			keyboardRow = []tgbotapi.InlineKeyboardButton{}
+		}
+	}
+	keyboard := &tgbotapi.InlineKeyboardMarkup{InlineKeyboard: InlineKeyboardButton}
+	return keyboard
+}

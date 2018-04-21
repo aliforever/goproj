@@ -1,0 +1,7 @@
+package configs
+
+var (
+	BOT_USERNAME = "%BOTUSERNAME%"
+	BOT_TOKEN    = "BOTTOKEN"
+	OwnerId      = 81997375
+)

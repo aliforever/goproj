@@ -1,0 +1,44 @@
+package models
+
+import (
+	"gopkg.in/mgo.v2/bson"
+)
+
+type User struct {
+	Id        int    `bson:"_id"`
+	FirstName string `bson:"first_name"`
+	LastName  string `bson:"last_name,omitempty"`
+	Username  string `bson:"username,omitempty"`
+	IsAdmin   bool   `bson:"is_admin,omitempty"`
+	Menu      string `bson:"menu,omitempty"`
+}
+
+func GetUserById(id int) (u *User, err error) {
+	u = &User{}
+	err = DB.C("users").FindId(id).One(&u)
+	return
+}
+
+func GetUsers() (u []*User, err error) {
+	u = []*User{}
+	err = DB.C("users").Find(bson.M{}).All(&u)
+	return
+}
+
+func (u *User) Insert() error {
+	return DB.C("users").Insert(&u)
+}
+
+func (u *User) Update(bsonMap *bson.M) error {
+	return DB.C("users").UpdateId(u.Id, bson.M{"$set": bsonMap})
+}
+
+func (u *User) UpdateMenu(menu string) error {
+	u.Menu = menu
+	return u.Update(&bson.M{"menu": menu})
+}
+
+func (u *User) GetLastHorse() (horse Horse, err error) {
+	err = DB.C("horses").Find(bson.M{"user_id": u.Id}).One(&horse)
+	return
+}
