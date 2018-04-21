@@ -35,7 +35,7 @@ func main() {
 
 	models.DB = session.DB(configs.BOT_USERNAME)
 	models.API = bot
-	app := funcs.%BOTUSERNAME%{}
+	app := funcs.%BOTUSERNAME_CAPS%{}
 
 	for update := range updates {
 		go PanicHandler(update, app.ProcessUpdate)
