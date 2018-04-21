@@ -37,8 +37,3 @@ func (u *User) UpdateMenu(menu string) error {
 	u.Menu = menu
 	return u.Update(&bson.M{"menu": menu})
 }
-
-func (u *User) GetLastHorse() (horse Horse, err error) {
-	err = DB.C("horses").Find(bson.M{"user_id": u.Id}).One(&horse)
-	return
-}
