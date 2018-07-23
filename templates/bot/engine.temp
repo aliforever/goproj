@@ -74,27 +74,6 @@ func (bot *%BOTUSERNAME_CAPS%) ProcessCallback() {
 	bot.SendToCurrentChat("Callback Query Handler not Found: " + callback.Data)
 }
 
-
-func (bot *%BOTUSERNAME_CAPS%) GetFrom() (u *tgbotapi.User) {
-	if bot.Update.Message != nil {
-		u = bot.Update.Message.From
-	} else if bot.Update.CallbackQuery != nil {
-		u = bot.Update.CallbackQuery.From
-	} else if bot.Update.InlineQuery != nil {
-		u = bot.Update.InlineQuery.From
-	}
-	return
-}
-
-func (bot *%BOTUSERNAME_CAPS%) GetMessage() (m *tgbotapi.Message) {
-	if bot.Update.Message != nil {
-		m = bot.Update.Message
-	} else if bot.Update.CallbackQuery != nil {
-		m = bot.Update.CallbackQuery.Message
-	}
-	return
-}
-
 func (bot *%BOTUSERNAME_CAPS%) RegisterOrUpdateUser() (err error) {
 	from := bot.GetFrom()
 	if from == nil {
@@ -129,17 +108,7 @@ func (bot *%BOTUSERNAME_CAPS%) RegisterOrUpdateUser() (err error) {
 	return
 }
 
-func (bot *%BOTUSERNAME_CAPS%) SwitchMenu(name string) {
-	st := reflect.TypeOf(bot)
-	_, ok := st.MethodByName(name)
-	if !ok {
-		bot.SendToCurrentChat("Invalid Menu " + name)
-		bot.CurrentUser.UpdateMenu("MainMenu")
-		return
-	}
-	bot.Redirected = true
-	reflect.ValueOf(bot).MethodByName(name).Call([]reflect.Value{})
-}
+
 
 func (bot *%BOTUSERNAME_CAPS%) MainMenu() {
 	bot.CurrentUser.UpdateMenu("MainMenu")
@@ -149,202 +118,12 @@ func (bot *%BOTUSERNAME_CAPS%) MainMenu() {
 		items[bot.Update.Message.Text]()
 		return
 	}
-	bot.SendToCurrentChatKeyboard("Main Menu", bot.MainMenuKeyboard())
+	bot.SendToCurrentChatKeyboard(bot.Language.MainMenuText(), bot.MainMenuKeyboard())
 }
 
 func (bot *%BOTUSERNAME_CAPS%) MainMenuKeyboard() (keyboard *tgbotapi.ReplyKeyboardMarkup) {
 	var rows [][]string
-	rows = append(rows, []string{"back"})
+	rows = append(rows, []string{bot.Language.BackBtnText()})
 	keyboard = MakeReplyKeyboardFromArray(rows)
 	return
-}
-
-
-func (bot *%BOTUSERNAME_CAPS%) SendPhotoIdWithCaptionToChatId(photoId, caption string, chatId int) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewPhotoShare(int64(chatId), photoId)
-	chattable.Caption = caption
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) EditChatMessageKeyboardInline(chatId, messageId int, keyboard *tgbotapi.InlineKeyboardMarkup) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewEditMessageReplyMarkup(int64(chatId), messageId, *keyboard)
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) EditCurrentChatMessage(text string, keyboard *tgbotapi.InlineKeyboardMarkup) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewEditMessageText(int64(bot.GetFrom().ID), bot.GetMessage().MessageID, text)
-	chattable.ReplyMarkup = keyboard
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) SendPhotoIdToCurrentGroup(photoId string, parameters ...map[string]interface{}) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewPhotoShare(bot.Update.Message.Chat.ID, photoId)
-	for _, parameter := range parameters {
-		for key, value := range parameter {
-			if key == "reply_to_message_id" {
-				if value.(int) != 0 {
-					chattable.ReplyToMessageID = value.(int)
-				}
-			}
-		}
-	}
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) SendVoiceIdToCurrentGroup(voiceId string, parameters ...map[string]interface{}) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewVoiceShare(bot.Update.Message.Chat.ID, voiceId)
-	for _, parameter := range parameters {
-		for key, value := range parameter {
-			if key == "reply_to_message_id" {
-				if value.(int) != 0 {
-					chattable.ReplyToMessageID = value.(int)
-				}
-			}
-		}
-	}
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) SendPhotoIdWithCaptionToCurrentChat(photoId, caption string) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewPhotoShare(int64(bot.CurrentUser.Id), photoId)
-	chattable.Caption = caption
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) SendPhotoIdWithCaptionToCurrentChatInlineKeyboard(photoId, caption string, keyboard *tgbotapi.InlineKeyboardMarkup) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewPhotoShare(int64(bot.CurrentUser.Id), photoId)
-	chattable.Caption = caption
-	chattable.ReplyMarkup = keyboard
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) SendPhotoUploadWithCaptionToCurrentChat(file interface{}, caption string) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewPhotoUpload(int64(bot.CurrentUser.Id), file)
-	chattable.Caption = caption
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) SendToCurrentChat(text string, parameters ...map[string]interface{}) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewMessage(int64(bot.CurrentUser.Id), text)
-	for _, parameter := range parameters {
-		for key, value := range parameter {
-			if key == "disable_web_page_preview" {
-				if value.(bool) == true {
-					chattable.DisableWebPagePreview = true
-				}
-			}
-			if key == "reply_to_message_id" {
-				if value.(int) != 0 {
-					chattable.ReplyToMessageID = value.(int)
-				}
-			}
-		}
-	}
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) SendFileToCurrentChat(path string) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewDocumentUpload(bot.Update.Message.Chat.ID, path)
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) SendToCurrentGroup(text string, parameters ...map[string]interface{}) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewMessage(int64(bot.Update.Message.Chat.ID), text)
-	for _, parameter := range parameters {
-		for key, value := range parameter {
-			if key == "disable_web_page_preview" {
-				if value.(bool) == true {
-					chattable.DisableWebPagePreview = true
-				}
-			}
-			if key == "reply_to_message_id" {
-				if value.(int) != 0 {
-					chattable.ReplyToMessageID = value.(int)
-				}
-			}
-			if key == "parse_mode" {
-				if value.(string) != "" {
-					chattable.ParseMode = value.(string)
-				}
-			}
-		}
-	}
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) SendToCurrentGroupInlineKeyboard(text string, keyboard *tgbotapi.InlineKeyboardMarkup, parameters ...map[string]interface{}) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewMessage(int64(bot.Update.Message.Chat.ID), text)
-	for _, parameter := range parameters {
-		for key, value := range parameter {
-			if key == "disable_web_page_preview" {
-				if value.(bool) == true {
-					chattable.DisableWebPagePreview = true
-				}
-			}
-			if key == "reply_to_message_id" {
-				if value.(int) != 0 {
-					chattable.ReplyToMessageID = value.(int)
-				}
-			}
-			if key == "parse_mode" {
-				if value.(string) != "" {
-					chattable.ParseMode = value.(string)
-				}
-			}
-		}
-	}
-	chattable.ReplyMarkup = keyboard
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) SendToChatId(chatId int, text string, parameters ...map[string]interface{}) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewMessage(int64(chatId), text)
-	for _, parameter := range parameters {
-		for key, value := range parameter {
-			if key == "disable_web_page_preview" {
-				if value.(bool) == true {
-					chattable.DisableWebPagePreview = value.(bool)
-				}
-			}
-			if key == "reply_to_message_id" {
-				if value.(int) != 0 {
-					chattable.ReplyToMessageID = value.(int)
-				}
-			}
-			if key == "parse_mode" {
-				if value.(string) != "" {
-					chattable.ParseMode = value.(string)
-				}
-			}
-		}
-	}
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) SendToCurrentChatKeyboard(text string, keyboard *tgbotapi.ReplyKeyboardMarkup) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewMessage(int64(bot.CurrentUser.Id), text)
-	chattable.ReplyMarkup = keyboard
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) EditCurrentChatMessageTextInlineKeyboard(text string, keyboard *tgbotapi.InlineKeyboardMarkup) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewEditMessageText(int64(bot.CurrentUser.Id), bot.GetMessage().MessageID, text)
-	chattable.ReplyMarkup = keyboard
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) SendToCurrentChatInlineKeyboard(text string, keyboard *tgbotapi.InlineKeyboardMarkup) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewMessage(int64(bot.CurrentUser.Id), text)
-	chattable.ReplyMarkup = keyboard
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) ForwardToChatId(chatId int) (tgbotapi.Message, error) {
-	chattable := tgbotapi.NewForward(int64(chatId), int64(bot.GetFrom().ID), bot.Update.Message.MessageID)
-	return models.API.Send(chattable)
-}
-
-func (bot *%BOTUSERNAME_CAPS%) DeleteCurrentMessage() (tgbotapi.APIResponse, error) {
-	chattable := tgbotapi.DeleteMessageConfig{MessageID: bot.GetMessage().MessageID, ChatID: int64(bot.GetFrom().ID)}
-	return models.API.DeleteMessage(chattable)
 }
