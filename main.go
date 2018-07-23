@@ -33,6 +33,9 @@ func CreateBotProject(username, token string) {
 	engineBytes, _ := file.FileGetContents(currentPath + "templates/bot/engine.temp") // %BOTUSERNAME% %BOTUSERNAME_CAPS%
 	engineBytes = []byte(strings.Replace(string(engineBytes), "%BOTUSERNAME%", username, -1))
 	engineBytes = []byte(strings.Replace(string(engineBytes), "%BOTUSERNAME_CAPS%", strings.ToUpper(username), -1))
+	methodsBytes, _ := file.FileGetContents(currentPath + "templates/bot/methods.temp") // %BOTUSERNAME% %BOTUSERNAME_CAPS%
+	methodsBytes = []byte(strings.Replace(string(methodsBytes), "%BOTUSERNAME%", username, -1))
+	methodsBytes = []byte(strings.Replace(string(methodsBytes), "%BOTUSERNAME_CAPS%", strings.ToUpper(username), -1))
 	configBytes, _ := file.FileGetContents(currentPath + "templates/bot/config.temp") // %BOTUSERNAME% %BOTTOKEN%
 	configBytes = []byte(strings.Replace(string(configBytes), "%BOTUSERNAME%", username, -1))
 	configBytes = []byte(strings.Replace(string(configBytes), "%BOTTOKEN%", token, -1))
@@ -56,6 +59,7 @@ func CreateBotProject(username, token string) {
 		return
 	}
 	file.FilePutContents(funcsPath + "engine.go", engineBytes)
+	file.FilePutContents(funcsPath + "methods.go", methodsBytes)
 	file.FilePutContents(funcsPath + "keyboards.go", keyboardsBytes)
 	file.FilePutContents(modelPath + "api.go", apiBytes)
 	file.FilePutContents(modelPath + "database.go", databaseBytes)

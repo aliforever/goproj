@@ -220,4 +220,3 @@ func (bot *%BOTUSERNAME_CAPS%) DeleteCurrentMessage() (tgbotapi.APIResponse, err
 	chattable := tgbotapi.DeleteMessageConfig{MessageID: bot.GetMessage().MessageID, ChatID: int64(bot.GetFrom().ID)}
 	return models.API.DeleteMessage(chattable)
 }
-
