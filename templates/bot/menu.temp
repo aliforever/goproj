@@ -1,0 +1,20 @@
+func (bot *%BOTUSERNAME_CAPS%) %MENU%Menu() {
+	bot.CurrentUser.UpdateMenu("%MENU%Menu")
+	items := map[string]func(){}
+	if !bot.Redirected {
+		if _, ok := items[bot.Update.Message.Text]; ok {
+			bot.Redirected = true
+			items[bot.Update.Message.Text]()
+			return
+		}
+	}
+
+	bot.SendToCurrentChatKeyboard(bot.Language.%MENU%MenuText(), bot.%MENU%MenuKeyboard())
+}
+
+func (bot *%BOTUSERNAME_CAPS%) %MENU%MenuKeyboard() (keyboard *tgbotapi.ReplyKeyboardMarkup) {
+	var rows [][]string
+	rows = append(rows, []string{bot.Language.BackBtnText()})
+	keyboard = MakeReplyKeyboardFromArray(rows)
+	return
+}

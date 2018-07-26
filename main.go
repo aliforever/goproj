@@ -9,16 +9,54 @@ import (
 	"os/exec"
 )
 
+func GoPATH() string {
+	return  os.Getenv("GOPATH") + "/src/"
+}
+
 func main() {
 	projectType := flag.String("type", "new_project", "Enter Project Name'")
 	botName := flag.String("username", "bot_username", "Enter Bot Username")
 	botToken := flag.String("token", "bot_token", "Enter Bot Token")
+	makeItem := flag.String("make", "menu=make_item", "Enter Make Item")
 	flag.Parse()
+	if *makeItem != "menu=make_item" {
+		if strings.Contains(*makeItem, "menu") {
+			split := strings.Split(*makeItem, ":")
+			err := CreateMenuForBot(*botName, split[1])
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Println(fmt.Sprintf("New Menu %s Added to %s Bot", split[1], *botName))
+			}
+			return
+		}
+	}
 	if *projectType == "bot" {
 		CreateBotProject(*botName, *botToken)
 	} else {
 		fmt.Println("Project is not supported yet!")
 	}
+}
+
+func CreateMenuForBot(username, menuName string) error {
+	enginePath := GoPATH() + username + "/funcs/engine.go"
+	f, err := os.OpenFile(enginePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	menuByte, err := file.FileGetContents("templates/bot/menu.temp")
+	if err != nil {
+		return err
+	}
+	menu := strings.Replace(string(menuByte), "%MENU%", menuName, -1)
+	menu = strings.Replace(menu, "%BOTUSERNAME_CAPS%", strings.ToUpper(username), -1)
+	if _, err := f.Write([]byte("\n" + menu)); err != nil {
+		return err
+	}
+	if err := f.Close(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func CreateBotProject(username, token string) {
