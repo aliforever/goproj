@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"os/exec"
+	"strconv"
 )
 
 func GoPATH() string {
@@ -20,9 +21,34 @@ func main() {
 	makeItem := flag.String("make", "menu=make_item", "Enter Make Item")
 	flag.Parse()
 	if *makeItem != "menu=make_item" {
+		dir, err := os.Getwd()
+		if err != nil {
+			return
+		}
+		if *botName == "bot_username" {
+			// for windows directory
+			split := strings.Split(dir, `\src\`)
+			if len(split) < 2 {
+				// for linux directory
+				split = strings.Split(dir, `/src/`)
+				if len(split) < 2 {
+					fmt.Println("Wrong Directory, Please Specify Project Name")
+					return
+				}
+			}
+			botName = &split[1]
+		}
+
 		if strings.Contains(*makeItem, "menu") {
 			split := strings.Split(*makeItem, ":")
-			err := CreateMenuForBot(*botName, split[1])
+			line := 0
+			if len(split) == 3 {
+				lineInt, err := strconv.Atoi(split[2])
+				if err == nil {
+					line = lineInt
+				}
+			}
+			err = CreateMenuForBot(*botName, split[1], line)
 			if err != nil {
 				fmt.Println(err)
 			} else {
@@ -38,24 +64,40 @@ func main() {
 	}
 }
 
-func CreateMenuForBot(username, menuName string) error {
+func CreateMenuForBot(username, menuName string, line int) error {
 	enginePath := GoPATH() + username + "/funcs/engine.go"
-	f, err := os.OpenFile(enginePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	menuByte, err := file.FileGetContents("templates/bot/menu.temp")
+
+	currentPath := GoPATH() + "goproj/"
+	menuByte, err := file.FileGetContents(currentPath + "templates/bot/menu.temp")
 	if err != nil {
 		return err
 	}
 	menu := strings.Replace(string(menuByte), "%MENU%", menuName, -1)
 	menu = strings.Replace(menu, "%BOTUSERNAME_CAPS%", strings.ToUpper(username), -1)
-	if _, err := f.Write([]byte("\n" + menu)); err != nil {
+	currentEngineBytes, err := file.FileGetContents(enginePath)
+	if err != nil {
 		return err
 	}
-	if err := f.Close(); err != nil {
-		return err
+	var newEngineBytes []byte
+	if line == 0 {
+		newEngineBytes = []byte((string(currentEngineBytes) + "\n" + menu))
+	} else {
+		split := strings.Split(string(currentEngineBytes), "\n")
+
+		if len(split) < line {
+			newEngineBytes = []byte((string(currentEngineBytes) + "\n" + menu))
+		} else {
+			for i := range split {
+				if i+1 == line {
+					engine := strings.Join(split[:i+1], "\n") + "\n" + menu + "\n" + strings.Join(split[i+1:], "\n")
+					newEngineBytes = []byte(engine)
+					break
+				}
+			}
+		}
 	}
+
+	file.FilePutContents(enginePath, newEngineBytes)
 	return nil
 }
 
