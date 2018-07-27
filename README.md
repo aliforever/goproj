@@ -11,5 +11,5 @@ Install:
 ```goproj --type=bot --username=BOT_USERNAME --token=BOT_TOKEN```
 
 - Add New Menu to Bot's Engine File:
-```goproj --username=BOT_USERNAME --make=menu:MENU_NAME:LINE_NUMBER
+```goproj --username=BOT_USERNAME --make=menu:MENU_NAME:LINE_NUMBER```
 (leave the username part to add menu to existing project)
