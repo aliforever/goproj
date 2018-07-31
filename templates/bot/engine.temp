@@ -25,30 +25,16 @@ type %BOTUSERNAME_CAPS% struct {
 	Language    lang.Language
 }
 
-func (bot *%BOTUSERNAME_CAPS%) ProcessUpdate(update tgbotapi.Update) {
-	bot.Update = &update
-	message := bot.Update.Message
-	callback := bot.Update.CallbackQuery
-	inlineQuery := bot.Update.InlineQuery
-
-	bot.Language = &lang.Persian{}
-	if message == nil && callback == nil && inlineQuery == nil {
-		return
-	}
-	err := bot.RegisterOrUpdateUser()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	if message != nil {
-		bot.ProcessMenu()
-	} else if callback != nil {
-		bot.ProcessCallback()
-	} else {
-		return
-	}
-	/*bot.SwitchMenu("MainMenu")*/
-
+func (bot *%BOTUSERNAME_CAPS%) ProcessSuperCommands(command string) {
+    if command == "users:count" {
+        count, err := models.DB.C("users").Find(bson.M{}).Count()
+        if err != nil {
+            bot.SendToCurrentChat(err.Error())
+            return
+        }
+        bot.SendToCurrentChat(fmt.Sprintf("User Count is: %d", count))
+    }
+    return
 }
 
 func (bot *%BOTUSERNAME_CAPS%) ProcessMenu() {

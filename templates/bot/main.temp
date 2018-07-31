@@ -23,16 +23,31 @@ func main() {
 		log.Panic(err)
 	}
 	bot.Buffer = 10000
+	if canSetWebHook() {
+        res, err := bot.SetWebhook(tgbotapi.NewWebhook(configs.WEBHOOK_URL))
+        if err != nil {
+            fmt.Println(err)
+        }
+        fmt.Println(res)
+    }
+    session, err := mgo.Dial("localhost")
+    if err != nil {
+        panic(err)
+    }
+    defer session.Close()
+	var updates tgbotapi.UpdatesChannel
 	log.Printf("Authorized on account %s", bot.Self.UserName)
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-	updates, err := bot.GetUpdatesChan(u)
-	session, err := mgo.Dial("localhost")
-	if err != nil {
-		panic(err)
-	}
-	defer session.Close()
+	if !getUpdates() {
+        updates = bot.ListenForWebhook("/" + bot.Token)
+    } else {
+        bot.RemoveWebhook()
+        u := tgbotapi.NewUpdate(0)
+        u.Timeout = 60
+        updates, err = bot.GetUpdatesChan(u)
+    }
 
+
+    go http.ListenAndServe("0.0.0.0:configs.SERVER_PORT", nil)
 	models.DB = session.DB(configs.BOT_USERNAME)
 	models.API = bot
 	app := funcs.%BOTUSERNAME_CAPS%{}
@@ -60,4 +75,12 @@ func PanicHandler(update tgbotapi.Update, fun func(update tgbotapi.Update)) {
 		}
 	}()
 	fun(update)
+}
+
+func setWebHook() bool {
+	return os.Getenv("SET_WEBHOOK") == "YES"
+}
+
+func getUpdates() bool {
+	return os.Getenv("GET_UPDATES") == "YES"
 }

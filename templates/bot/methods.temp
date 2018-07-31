@@ -1,5 +1,41 @@
 package bot
 
+func (bot *%BOTUSERNAME_CAPS%) ProcessUpdate(update tgbotapi.Update) {
+	bot.Update = &update
+	message := bot.Update.Message
+	callback := bot.Update.CallbackQuery
+	inlineQuery := bot.Update.InlineQuery
+
+	if message.Chat.Type != "private" {
+        bot.SendToCurrentGroup(strconv.Itoa(int(bot.Update.Message.Chat.ID)))
+        return
+    }
+	if message == nil && callback == nil && inlineQuery == nil {
+		return
+	}
+	err := bot.RegisterOrUpdateUser()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if message != nil {
+	    if message.Text != "" {
+	        if strings.Contains(message.Text, configs.SUPPER_COMMANDS_STARTER) {
+	            split := strings.Split(message.Text, configs.SUPPER_COMMANDS_STARTER)
+                bot.ProcessSuperCommands(split[1])
+                return
+	        }
+	    }
+		bot.ProcessMenu()
+	} else if callback != nil {
+		bot.ProcessCallback()
+	} else {
+		return
+	}
+	/*bot.SwitchMenu("MainMenu")*/
+
+}
+
 func (bot *%BOTUSERNAME_CAPS%) GetFrom() (u *tgbotapi.User) {
 	if bot.Update.Message != nil {
 		u = bot.Update.Message.From

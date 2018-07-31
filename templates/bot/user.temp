@@ -6,17 +6,15 @@ import (
 
 type User struct {
 	Id        int    `bson:"_id"`
-	FirstName string `bson:"first_name"`
+	FirstName string `bson:"first_name,omitempty"`
 	LastName  string `bson:"last_name,omitempty"`
 	Username  string `bson:"username,omitempty"`
 	IsAdmin   bool   `bson:"is_admin,omitempty"`
 	Menu      string `bson:"menu,omitempty"`
 }
 
-func GetUserById(id int) (u *User, err error) {
-	u = &User{}
-	err = DB.C("users").FindId(id).One(&u)
-	return
+func (u *User) FindId() error {
+    return DB.C("users").FindId(u.Id)
 }
 
 func GetUsers() (u []*User, err error) {
@@ -31,6 +29,10 @@ func (u *User) Insert() error {
 
 func (u *User) Update(bsonMap *bson.M) error {
 	return DB.C("users").UpdateId(u.Id, bson.M{"$set": bsonMap})
+}
+
+func (u *User) Save(bsonMap *bson.M) error {
+	return DB.C("users").UpdateId(u.Id, bson.M{"$set": &u})
 }
 
 func (u *User) UpdateMenu(menu string) error {

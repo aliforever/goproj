@@ -1,7 +1,10 @@
 package configs
 
 var (
-	BOT_USERNAME = "%BOTUSERNAME%"
-	BOT_TOKEN    = "%BOTTOKEN%"
-	OwnerId      = 81997375
+	BOT_USERNAME            = "%BOTUSERNAME%"
+	BOT_TOKEN               = "%BOTTOKEN%"
+	WEBHOOK_URL             = "%WEBHOOK_URL%"
+	SERVER_PORT             = 8444
+	OwnerId                 = 81997375
+	SUPPER_COMMANDS_STARTER = "/_"
 )

@@ -8,10 +8,38 @@ import (
 	"strings"
 	"os/exec"
 	"strconv"
+	"errors"
 )
 
 func GoPATH() string {
 	return  os.Getenv("GOPATH") + "/src/"
+}
+
+func TemplatePath() string {
+	return GoPATH() + "goproj/templates"
+}
+
+func ProjectPath(name string)  string {
+	return  GoPATH() + name + "/"
+}
+
+func CurrentDirectoryProjectName() (directory *string, err error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return
+	}
+	// for windows directory
+	split := strings.Split(dir, `\src\`)
+	if len(split) < 2 {
+		// for linux directory
+		split = strings.Split(dir, `/src/`)
+		if len(split) < 2 {
+			err = errors.New("wrong_directory")
+			return
+		}
+	}
+	directory = &split[1]
+	return
 }
 
 func main() {
@@ -21,22 +49,13 @@ func main() {
 	makeItem := flag.String("make", "menu=make_item", "Enter Make Item")
 	flag.Parse()
 	if *makeItem != "menu=make_item" {
-		dir, err := os.Getwd()
-		if err != nil {
-			return
-		}
 		if *botName == "bot_username" {
-			// for windows directory
-			split := strings.Split(dir, `\src\`)
-			if len(split) < 2 {
-				// for linux directory
-				split = strings.Split(dir, `/src/`)
-				if len(split) < 2 {
-					fmt.Println("Wrong Directory, Please Specify Project Name")
-					return
-				}
+			directoryName, err := CurrentDirectoryProjectName()
+			if err != nil {
+				fmt.Println(err)
+				return
 			}
-			botName = &split[1]
+			botName = directoryName
 		}
 
 		if strings.Contains(*makeItem, "menu") {
@@ -48,7 +67,7 @@ func main() {
 					line = lineInt
 				}
 			}
-			err = CreateMenuForBot(*botName, split[1], line)
+			err := CreateMenuForBot(*botName, split[1], line)
 			if err != nil {
 				fmt.Println(err)
 			} else {
@@ -65,10 +84,8 @@ func main() {
 }
 
 func CreateMenuForBot(username, menuName string, line int) error {
-	enginePath := GoPATH() + username + "/funcs/engine.go"
-
-	currentPath := GoPATH() + "goproj/"
-	menuByte, err := file.FileGetContents(currentPath + "templates/bot/menu.temp")
+	enginePath := ProjectPath(username) + "funcs/engine.go"
+	menuByte, err := file.FileGetContents(TemplatePath() + "templates/bot/menu.temp")
 	if err != nil {
 		return err
 	}
