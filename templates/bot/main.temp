@@ -13,7 +13,7 @@ import (
 	"time"
 
 	goerrors "github.com/go-errors/errors"
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/aliforever/telegram-bot-api"
 )
 
 func main() {
@@ -23,7 +23,7 @@ func main() {
 		log.Panic(err)
 	}
 	bot.Buffer = 10000
-	if canSetWebHook() {
+	if setWebHook() {
         res, err := bot.SetWebhook(tgbotapi.NewWebhook(configs.WEBHOOK_URL))
         if err != nil {
             fmt.Println(err)
@@ -47,7 +47,7 @@ func main() {
     }
 
 
-    go http.ListenAndServe("0.0.0.0:configs.SERVER_PORT", nil)
+    go http.ListenAndServe("0.0.0.0:" + configs.SERVER_PORT, nil)
 	models.DB = session.DB(configs.BOT_USERNAME)
 	models.API = bot
 	app := funcs.%BOTUSERNAME_CAPS%{}

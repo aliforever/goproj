@@ -14,7 +14,7 @@ import (
 
 	"strings"
 
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/aliforever/telegram-bot-api"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -60,15 +60,14 @@ func (bot *%BOTUSERNAME_CAPS%) ProcessCallback() {
 	bot.SendToCurrentChat("Callback Query Handler not Found: " + callback.Data)
 }
 
-func (bot *%BOTUSERNAME_CAPS%) RegisterOrUpdateUser() (err error) {
+func (bot *ANBUSUPERBOT) RegisterOrUpdateUser() (err error) {
 	from := bot.GetFrom()
 	if from == nil {
 		err = errors.New("nil_from")
 		return
 	}
-
-	user, err := models.GetUserById(from.ID)
-	if err == nil {
+	user := models.User{Id: from.ID}
+	if user.FindId() != nil {
 		bsonMap := bson.M{}
 		bsonMap["first_name"] = from.FirstName
 		if from.LastName != "" {
@@ -80,7 +79,7 @@ func (bot *%BOTUSERNAME_CAPS%) RegisterOrUpdateUser() (err error) {
 		err = user.Update(&bsonMap)
 
 	} else {
-		user = &models.User{}
+		user = models.User{}
 		user.Id = from.ID
 		user.FirstName = from.FirstName
 		user.LastName = from.LastName
@@ -90,7 +89,7 @@ func (bot *%BOTUSERNAME_CAPS%) RegisterOrUpdateUser() (err error) {
 	if err != nil {
 		return
 	}
-	bot.CurrentUser = user
+	bot.CurrentUser = &user
 	return
 }
 

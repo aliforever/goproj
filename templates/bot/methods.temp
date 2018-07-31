@@ -1,4 +1,6 @@
-package bot
+package funcs
+
+import "github.com/aliforever/telegram-bot-api"
 
 func (bot *%BOTUSERNAME_CAPS%) ProcessUpdate(update tgbotapi.Update) {
 	bot.Update = &update

@@ -14,7 +14,7 @@ type User struct {
 }
 
 func (u *User) FindId() error {
-    return DB.C("users").FindId(u.Id)
+    return DB.C("users").FindId(u.Id).One(&u)
 }
 
 func GetUsers() (u []*User, err error) {

@@ -1,6 +1,6 @@
 package lang
 
 type Language interface {
-	MainMenuText() string
-	BackBtnText() string
+	MainMenu() string
+	BackBtn() string
 }

@@ -1,5 +1,5 @@
 package models
 
-import "github.com/go-telegram-bot-api/telegram-bot-api"
+import "github.com/aliforever/telegram-bot-api"
 
 var API *tgbotapi.BotAPI
