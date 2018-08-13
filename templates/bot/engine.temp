@@ -132,7 +132,7 @@ func (bot *%BOTUSERNAME_CAPS%) ChooseLanguageMenuKeyboard() (keyboard *tgbotapi.
 func (bot *%BOTUSERNAME_CAPS%) MainMenu() {
 	bot.CurrentUser.UpdateMenu("MainMenu")
 	items := map[string]func(){
-        bot.Language.SelectLanguageBtnText():          bot.ChooseLanguageMenu,
+        bot.Language.SelectLanguageBtn():          bot.ChooseLanguageMenu,
     }
 	if !bot.Redirected {
 	    if _, ok := items[bot.Update.Message.Text]; ok {
