@@ -8,7 +8,7 @@ import (
 
 func BackKeyboard(lang lang.Language) *tgbotapi.ReplyKeyboardMarkup {
 	rows := [][]string{}
-	firstRow := []string{lang.BackBtnText()}
+	firstRow := []string{lang.BackBtn()}
 	rows = append(rows, firstRow)
 	return MakeReplyKeyboardFromArray(rows)
 }

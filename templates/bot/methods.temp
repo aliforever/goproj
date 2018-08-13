@@ -20,6 +20,17 @@ func (bot *%BOTUSERNAME_CAPS%) ProcessUpdate(update tgbotapi.Update) {
 		log.Println(err)
 		return
 	}
+	if bot.CurrentUser.Language == "EN" {
+        bot.Language = &lang.English{}
+    } else if bot.CurrentUser.Language == "FA" {
+        bot.Language = &lang.Persian{}
+    } else {
+        if bot.CurrentUser.Menu != "ChooseLanguageMenu" {
+            bot.Redirected = true
+            bot.ChooseLanguageMenu()
+            return
+        }
+    }
 	if message != nil {
 	    if message.Text != "" {
 	        if strings.Contains(message.Text, configs.SUPPER_COMMANDS_STARTER) {

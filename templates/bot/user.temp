@@ -11,6 +11,7 @@ type User struct {
 	Username  string `bson:"username,omitempty"`
 	IsAdmin   bool   `bson:"is_admin,omitempty"`
 	Menu      string `bson:"menu,omitempty"`
+	Language  string `bson:"language,omitempty"`
 }
 
 func (u *User) FindId() error {
@@ -31,7 +32,7 @@ func (u *User) Update(bsonMap *bson.M) error {
 	return DB.C("users").UpdateId(u.Id, bson.M{"$set": bsonMap})
 }
 
-func (u *User) Save(bsonMap *bson.M) error {
+func (u *User) Save() error {
 	return DB.C("users").UpdateId(u.Id, bson.M{"$set": &u})
 }
 

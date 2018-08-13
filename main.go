@@ -141,6 +141,7 @@ func CreateBotProject(username, token string) {
 	mainBytes = []byte(strings.Replace(string(mainBytes), "%BOTUSERNAME_CAPS%", strings.ToUpper(username), -1))
 	userBytes, _ := file.FileGetContents(currentPath + "templates/bot/user.temp")
 	persianBytes, _ := file.FileGetContents(currentPath + "templates/bot/persian.temp")
+	englishBytes, _ := file.FileGetContents(currentPath + "templates/bot/english.temp")
 
 	configPath := goSourcePath + "/configs/"
 	funcsPath := goSourcePath + "/funcs/"
@@ -163,6 +164,7 @@ func CreateBotProject(username, token string) {
 	file.FilePutContents(modelPath + "user.go", userBytes)
 	file.FilePutContents(langPath + "language.go", languageBytes)
 	file.FilePutContents(langPath + "persian.go", persianBytes)
+	file.FilePutContents(langPath + "english.go", englishBytes)
 	file.FilePutContents(goSourcePath + "/main.go", mainBytes)
 	exec.Command("go fmt ", "-w", goSourcePath).Output()
 	exec.Command("goimports", "-w", goSourcePath).Output()

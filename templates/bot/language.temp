@@ -1,6 +1,8 @@
 package lang
 
 type Language interface {
+    LanguageName() string
+    LanguageFlag() string
 	MainMenu() string
 	BackBtn() string
 }

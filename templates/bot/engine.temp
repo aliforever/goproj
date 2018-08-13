@@ -67,7 +67,7 @@ func (bot *%BOTUSERNAME_CAPS%) RegisterOrUpdateUser() (err error) {
 		return
 	}
 	user := models.User{Id: from.ID}
-	if user.FindId() != nil {
+	if user.FindId() == nil {
 		bsonMap := bson.M{}
 		bsonMap["first_name"] = from.FirstName
 		if from.LastName != "" {
@@ -93,7 +93,41 @@ func (bot *%BOTUSERNAME_CAPS%) RegisterOrUpdateUser() (err error) {
 	return
 }
 
+func (bot *%BOTUSERNAME_CAPS%) ChooseLanguageMenu() {
+	bot.CurrentUser.UpdateMenu("ChooseLanguageMenu")
+	fa := lang.Persian{}
+	en := lang.English{}
+	if !bot.Redirected {
+		if bot.Update.Message.Text != "" {
+			text := bot.Update.Message.Text
+			persianLang := fa.LanguageFlag() + " " + fa.LanguageName()
+			englishLang := en.LanguageFlag() + " " + en.LanguageName()
+			if text == persianLang {
+				bot.Language = &lang.Persian{}
+				bot.CurrentUser.Language = "FA"
+				bot.CurrentUser.Save()
+				bot.SwitchMenu("MainMenu")
+				return
+			} else if text == englishLang {
+				bot.Language = &lang.English{}
+				bot.CurrentUser.Language = "EN"
+				bot.CurrentUser.Save()
+				bot.SwitchMenu("MainMenu")
+				return
+			}
+		}
+	}
+	bot.SendToCurrentChatKeyboard(fa.SelectLanguageMenuText()+" "+fa.LanguageFlag()+"\n"+en.SelectLanguageMenuText()+" "+en.LanguageFlag(), bot.ChooseLanguageMenuKeyboard())
+}
 
+func (bot *%BOTUSERNAME_CAPS%) ChooseLanguageMenuKeyboard() (keyboard *tgbotapi.ReplyKeyboardMarkup) {
+	var rows [][]string
+	fa := lang.Persian{}
+	en := lang.English{}
+	rows = append(rows, []string{fa.LanguageFlag() + " " + fa.LanguageName(), en.LanguageFlag() + " " + en.LanguageName()})
+	keyboard = MakeReplyKeyboardFromArray(rows)
+	return
+}
 
 func (bot *%BOTUSERNAME_CAPS%) MainMenu() {
 	bot.CurrentUser.UpdateMenu("MainMenu")
@@ -106,12 +140,12 @@ func (bot *%BOTUSERNAME_CAPS%) MainMenu() {
         }
 	}
 
-	bot.SendToCurrentChatKeyboard(bot.Language.MainMenuText(), bot.MainMenuKeyboard())
+	bot.SendToCurrentChatKeyboard(bot.Language.MainMenu(), bot.MainMenuKeyboard())
 }
 
 func (bot *%BOTUSERNAME_CAPS%) MainMenuKeyboard() (keyboard *tgbotapi.ReplyKeyboardMarkup) {
 	var rows [][]string
-	rows = append(rows, []string{bot.Language.BackBtnText()})
+	rows = append(rows, []string{bot.Language.BackBtn()})
 	keyboard = MakeReplyKeyboardFromArray(rows)
 	return
 }

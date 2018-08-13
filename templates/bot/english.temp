@@ -1,0 +1,33 @@
+package lang
+
+type English struct {
+}
+
+func (e *English) LanguageFlag() string {
+	return "🇺🇸"
+}
+
+func (e *English) LanguageName() string {
+	return "English"
+}
+
+func (e *English) LanguageCode() string {
+	return "EN"
+}
+
+func (e *English) SelectLanguageMenuText() string {
+	return "Please Select Your Language"
+}
+
+func (e *English) SelectLanguageBtnText() string {
+	return "🇮🇷🇺🇸 Change Language"
+}
+func (e *English) MainMenu() string {
+	return "You're in Main Menu, Please Choose an Option"
+}
+
+func (e *English) BackBtn() string {
+	return "🔙 Back 🔙"
+}
+
+
