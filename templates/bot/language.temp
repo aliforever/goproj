@@ -3,6 +3,9 @@ package lang
 type Language interface {
     LanguageName() string
     LanguageFlag() string
+    LanguageCode() string
+    SelectLanguageMenu() string
+    SelectLanguageBtn() string
 	MainMenu() string
 	BackBtn() string
 }
