@@ -60,7 +60,7 @@ func (bot *%BOTUSERNAME_CAPS%) ProcessCallback() {
 	bot.SendToCurrentChat("Callback Query Handler not Found: " + callback.Data)
 }
 
-func (bot *ANBUSUPERBOT) RegisterOrUpdateUser() (err error) {
+func (bot *%BOTUSERNAME_CAPS%) RegisterOrUpdateUser() (err error) {
 	from := bot.GetFrom()
 	if from == nil {
 		err = errors.New("nil_from")
