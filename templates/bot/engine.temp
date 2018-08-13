@@ -131,7 +131,9 @@ func (bot *%BOTUSERNAME_CAPS%) ChooseLanguageMenuKeyboard() (keyboard *tgbotapi.
 
 func (bot *%BOTUSERNAME_CAPS%) MainMenu() {
 	bot.CurrentUser.UpdateMenu("MainMenu")
-	items := map[string]func(){}
+	items := map[string]func(){
+        bot.Language.SelectLanguageBtnText():          bot.ChooseLanguageMenu,
+    }
 	if !bot.Redirected {
 	    if _, ok := items[bot.Update.Message.Text]; ok {
             bot.Redirected = true
@@ -145,7 +147,7 @@ func (bot *%BOTUSERNAME_CAPS%) MainMenu() {
 
 func (bot *%BOTUSERNAME_CAPS%) MainMenuKeyboard() (keyboard *tgbotapi.ReplyKeyboardMarkup) {
 	var rows [][]string
-	rows = append(rows, []string{bot.Language.BackBtn()})
+	rows = append(rows, []string{bot.Language.SelectLanguageBtnText()})
 	keyboard = MakeReplyKeyboardFromArray(rows)
 	return
 }
