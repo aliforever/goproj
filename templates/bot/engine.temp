@@ -117,7 +117,7 @@ func (bot *%BOTUSERNAME_CAPS%) ChooseLanguageMenu() {
 			}
 		}
 	}
-	bot.SendToCurrentChatKeyboard(fa.SelectLanguageMenuText()+" "+fa.LanguageFlag()+"\n"+en.SelectLanguageMenuText()+" "+en.LanguageFlag(), bot.ChooseLanguageMenuKeyboard())
+	bot.SendToCurrentChatKeyboard(fa.SelectLanguageMenu()+" "+fa.LanguageFlag()+"\n"+en.SelectLanguageMenu()+" "+en.LanguageFlag(), bot.ChooseLanguageMenuKeyboard())
 }
 
 func (bot *%BOTUSERNAME_CAPS%) ChooseLanguageMenuKeyboard() (keyboard *tgbotapi.ReplyKeyboardMarkup) {
@@ -147,7 +147,7 @@ func (bot *%BOTUSERNAME_CAPS%) MainMenu() {
 
 func (bot *%BOTUSERNAME_CAPS%) MainMenuKeyboard() (keyboard *tgbotapi.ReplyKeyboardMarkup) {
 	var rows [][]string
-	rows = append(rows, []string{bot.Language.SelectLanguageBtnText()})
+	rows = append(rows, []string{bot.Language.SelectLanguageBtn()})
 	keyboard = MakeReplyKeyboardFromArray(rows)
 	return
 }

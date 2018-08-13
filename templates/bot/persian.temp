@@ -15,8 +15,12 @@ func (p *Persian) LanguageCode() string {
 	return "FA"
 }
 
-func (p *Persian) SelectLanguageMenuText() string {
+func (p *Persian) SelectLanguageMenu() string {
 	return "لطفا زبان خود را انتخاب کنید"
+}
+
+func (p *Persian) SelectLanguageBtn() string {
+	return "🇮🇷🇺🇸 تغییر زبان"
 }
 
 func (p *Persian) MainMenu() string {

@@ -15,11 +15,11 @@ func (e *English) LanguageCode() string {
 	return "EN"
 }
 
-func (e *English) SelectLanguageMenuText() string {
+func (e *English) SelectLanguageMenu() string {
 	return "Please Select Your Language"
 }
 
-func (e *English) SelectLanguageBtnText() string {
+func (e *English) SelectLanguageBtn() string {
 	return "🇮🇷🇺🇸 Change Language"
 }
 func (e *English) MainMenu() string {
