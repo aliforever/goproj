@@ -85,16 +85,35 @@ func main() {
 
 func CreateMenuForBot(username, menuName string, line int) error {
 	enginePath := ProjectPath(username) + "funcs/engine.go"
-	menuByte, err := file.FileGetContents(TemplatePath() + "templates/bot/menu.temp")
+	interfacePath := ProjectPath(username) + "lang/language.go"
+	persianPath := ProjectPath(username) + "lang/persian.go"
+	englishPath := ProjectPath(username) + "lang/english.go"
+	menuByte, err := file.FileGetContents(TemplatePath() + "/bot/menu.temp")
 	if err != nil {
 		return err
 	}
 	menu := strings.Replace(string(menuByte), "%MENU%", menuName, -1)
 	menu = strings.Replace(menu, "%BOTUSERNAME_CAPS%", strings.ToUpper(username), -1)
+	split := strings.Split(menu, "@language")
+	menu = split[0]
+	langParts := split[1]
+	split = strings.Split(langParts, "--")
+	langInterface := split[0]
+	persian := split[1]
+	english := split[2]
+	currentInterfaceBytes, err := file.FileGetContents(interfacePath)
+	currentPersianBytes, err := file.FileGetContents(persianPath)
+	currentEnglishBytes, err := file.FileGetContents(englishPath)
 	currentEngineBytes, err := file.FileGetContents(enginePath)
 	if err != nil {
 		return err
 	}
+	newInterfaceBytes := []byte((string(currentInterfaceBytes) + "\n" + langInterface))
+	newPersianBytes := []byte((string(currentPersianBytes) + "\n" + persian))
+	newEnglishBytes := []byte((string(currentEnglishBytes) + "\n" + english))
+	file.FilePutContents(interfacePath, newInterfaceBytes)
+	file.FilePutContents(persianPath, newPersianBytes)
+	file.FilePutContents(englishPath, newEnglishBytes)
 	var newEngineBytes []byte
 	if line == 0 {
 		newEngineBytes = []byte((string(currentEngineBytes) + "\n" + menu))

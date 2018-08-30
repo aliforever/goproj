@@ -8,10 +8,6 @@ func (bot *%BOTUSERNAME_CAPS%) ProcessUpdate(update tgbotapi.Update) {
 	callback := bot.Update.CallbackQuery
 	inlineQuery := bot.Update.InlineQuery
 
-	if message.Chat.Type != "private" {
-        bot.SendToCurrentGroup(strconv.Itoa(int(bot.Update.Message.Chat.ID)))
-        return
-    }
 	if message == nil && callback == nil && inlineQuery == nil {
 		return
 	}
@@ -39,7 +35,13 @@ func (bot *%BOTUSERNAME_CAPS%) ProcessUpdate(update tgbotapi.Update) {
                 return
 	        }
 	    }
-		bot.ProcessMenu()
+		if strings.Contains(message.Chat.Type, "group") {
+            bot.ProcessGroup()
+        } else if message.Chat.Type == "private" {
+            bot.ProcessMenu()
+        } else {
+            return
+        }
 	} else if callback != nil {
 		bot.ProcessCallback()
 	} else {

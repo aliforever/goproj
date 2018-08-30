@@ -37,6 +37,10 @@ func (bot *%BOTUSERNAME_CAPS%) ProcessSuperCommands(command string) {
     return
 }
 
+func (bot *%BOTUSERNAME_CAPS%) ProcessGroup() {
+
+}
+
 func (bot *%BOTUSERNAME_CAPS%) ProcessMenu() {
 	menu := bot.CurrentUser.Menu
 	st := reflect.TypeOf(bot)

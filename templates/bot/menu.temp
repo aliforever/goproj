@@ -9,12 +9,23 @@ func (bot *%BOTUSERNAME_CAPS%) %MENU%Menu() {
 		}
 	}
 
-	bot.SendToCurrentChatKeyboard(bot.Language.%MENU%MenuText(), bot.%MENU%MenuKeyboard())
+	bot.SendToCurrentChatKeyboard(bot.Language.%MENU%Menu(), bot.%MENU%MenuKeyboard())
 }
 
 func (bot *%BOTUSERNAME_CAPS%) %MENU%MenuKeyboard() (keyboard *tgbotapi.ReplyKeyboardMarkup) {
 	var rows [][]string
-	rows = append(rows, []string{bot.Language.BackBtnText()})
+	rows = append(rows, []string{bot.Language.BackBtn()})
 	keyboard = MakeReplyKeyboardFromArray(rows)
 	return
+}
+
+@language
+%MENU%Menu() string
+--
+func (p *Persian) %MENU%Menu() string {
+	return ""
+}
+--
+func (e *English) %MENU%Menu() string {
+	return ""
 }
