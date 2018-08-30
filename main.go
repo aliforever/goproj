@@ -108,9 +108,10 @@ func CreateMenuForBot(username, menuName string, line int) error {
 	if err != nil {
 		return err
 	}
-	newInterfaceBytes := []byte((string(currentInterfaceBytes) + "\n" + langInterface))
-	newPersianBytes := []byte((string(currentPersianBytes) + "\n" + persian))
-	newEnglishBytes := []byte((string(currentEnglishBytes) + "\n" + english))
+	lastBracketIndex := strings.LastIndex(string(currentInterfaceBytes), "}")
+	newInterfaceBytes := []byte((string(currentInterfaceBytes)[:lastBracketIndex-1] + langInterface + string(currentInterfaceBytes[lastBracketIndex:])))
+	newPersianBytes := []byte((string(currentPersianBytes)  + persian))
+	newEnglishBytes := []byte((string(currentEnglishBytes)  + english))
 	file.FilePutContents(interfacePath, newInterfaceBytes)
 	file.FilePutContents(persianPath, newPersianBytes)
 	file.FilePutContents(englishPath, newEnglishBytes)
@@ -132,8 +133,9 @@ func CreateMenuForBot(username, menuName string, line int) error {
 			}
 		}
 	}
-
 	file.FilePutContents(enginePath, newEngineBytes)
+	exec.Command("go fmt ", "-w", ProjectPath(username)).Output()
+	exec.Command("goimports", "-w", ProjectPath(username)).Output()
 	return nil
 }
 

@@ -22,6 +22,7 @@ func (e *English) SelectLanguageMenu() string {
 func (e *English) SelectLanguageBtn() string {
 	return "🇮🇷🇺🇸 Change Language"
 }
+
 func (e *English) MainMenu() string {
 	return "You're in Main Menu, Please Choose an Option"
 }
