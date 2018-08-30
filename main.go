@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"strconv"
 	"errors"
+	"unicode"
 )
 
 func GoPATH() string {
@@ -74,6 +75,15 @@ func main() {
 				fmt.Println(fmt.Sprintf("New Menu %s Added to %s Bot", split[1], *botName))
 			}
 			return
+		} else if strings.Contains(*makeItem, "model") {
+			split := strings.Split(*makeItem, ":")
+			err := CreateModelForBot(*botName, split[2], split[3], split[4])
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Println(fmt.Sprintf("New Model %s Added to %s Bot", split[1], *botName))
+			}
+			return
 		}
 	}
 	if *projectType == "bot" {
@@ -81,6 +91,31 @@ func main() {
 	} else {
 		fmt.Println("Project is not supported yet!")
 	}
+}
+
+func CreateModelForBot(username, modelFileName, modelStructName, modelTableName string) error {
+	modelsPath := ProjectPath(username) + "models/"
+	modelShortName := ""
+	fmt.Println(modelStructName)
+	for _, char := range  modelStructName {
+		if !unicode.IsLower(char) {
+			modelShortName += strings.ToLower(string(char))
+		}
+	}
+	modelBytes, err := file.FileGetContents(TemplatePath() + "/bot/model.temp")
+	if err != nil {
+		return err
+	}
+	model := strings.Replace(string(modelBytes), "%MODEL_STRUCT_NAME%",modelStructName, -1)
+	model = strings.Replace(model, "%MODEL_SHORT_NAME%",modelShortName, -1)
+	model = strings.Replace(model, "%MODEL_TABLE_NAME%",modelTableName, -1)
+	err = file.FilePutContents(modelsPath + modelFileName + ".go", []byte(model))
+	if err != nil {
+		return err
+	}
+	exec.Command("go fmt ", "-w", ProjectPath(username)).Output()
+	exec.Command("goimports", "-w", ProjectPath(username)).Output()
+	return nil
 }
 
 func CreateMenuForBot(username, menuName string, line int) error {

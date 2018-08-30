@@ -1,0 +1,26 @@
+package models
+
+type %MODEL_STRUCT_NAME% struct {
+    Id  bson.ObjectId   `bson:"_id,omitempty"`
+}
+
+func(%MODEL_SHORT_NAME% *%MODEL_STRUCT_NAME%) Insert() error {
+    return DB.C("%MODEL_TABLE_NAME%").Insert(&%MODEL_SHORT_NAME%)
+}
+
+func(%MODEL_SHORT_NAME% *%MODEL_STRUCT_NAME%) Save() error {
+    return DB.C("%MODEL_TABLE_NAME%").UpdateId(%MODEL_SHORT_NAME%.Id, bson.M{"$set":&%MODEL_SHORT_NAME%})
+}
+
+func(%MODEL_SHORT_NAME% *%MODEL_STRUCT_NAME%) Find() error {
+    return DB.C("%MODEL_TABLE_NAME%").Find(%MODEL_SHORT_NAME%).One(&%MODEL_SHORT_NAME%)
+}
+
+func(%MODEL_SHORT_NAME% *%MODEL_STRUCT_NAME%) FindById() error {
+    return DB.C("%MODEL_TABLE_NAME%").FindId(%MODEL_SHORT_NAME%.Id).One(&%MODEL_SHORT_NAME%)
+}
+
+func(%MODEL_SHORT_NAME% *%MODEL_STRUCT_NAME%) Remove() error {
+    return DB.C("%MODEL_TABLE_NAME%").RemoveId(%MODEL_SHORT_NAME%.Id)
+}
+
