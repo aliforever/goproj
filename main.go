@@ -142,8 +142,8 @@ func AddTextToLanguage(username, textTitle string)  error {
 	textContent := string(textBytes)
 	textContent = strings.Replace(textContent, "%TITLE%", textTitle, -1)
 	textContentInterface := textContent[strings.Index(textContent, "%INTERFACE%") + len("%INTERFACE%") : strings.Index(textContent, "%/INTERFACE%")]
-	textContentPersian := textContent[strings.Index(textContent, "%ENGLISH%") + len("%ENGLISH%"):strings.Index(textContent, "%/ENGLISH%")]
-	textContentEnglish := textContent[strings.Index(textContent, "%PERSIAN%") + len("%PERSIAN%"):strings.Index(textContent, "%/PERSIAN%")]
+	textContentEnglish := textContent[strings.Index(textContent, "%ENGLISH%") + len("%ENGLISH%"):strings.Index(textContent, "%/ENGLISH%")]
+	textContentPersian := textContent[strings.Index(textContent, "%PERSIAN%") + len("%PERSIAN%"):strings.Index(textContent, "%/PERSIAN%")]
 	interfaceBytes, err := file.FileGetContents(interfacePath)
 	if err != nil {
 		fmt.Println(err)
