@@ -1,0 +1,15 @@
+%INTERFACE%
+%TITLE%() string
+%/INTERFACE%
+
+%ENGLISH%
+func (e *English) %TITLE%() string {
+	return "Default"
+}
+%/ENGLISH%
+
+%PERSIAN%
+func (p *Persian) %TITLE%() string {
+	return "پیشفرض"
+}
+%/PERSIAN%

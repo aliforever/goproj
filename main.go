@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"errors"
 	"unicode"
-)
+	)
 
 func GoPATH() string {
 	return  os.Getenv("GOPATH") + "/src/"
@@ -47,19 +47,20 @@ func main() {
 	projectType := flag.String("type", "new_project", "Enter Project Name'")
 	botName := flag.String("username", "bot_username", "Enter Bot Username")
 	botToken := flag.String("token", "bot_token", "Enter Bot Token")
-	makeItem := flag.String("make", "menu=make_item", "Enter Make Item")
+	makeItem := flag.String("make", "make=make_item", "Enter Make Item")
+	addItem := flag.String("add", "add=item", "Enter Add Item")
+	goland_watchers := flag.String("goland_watchers", "1", "Should it enable go fmt and goimports ")
 	flag.Parse()
-	if *makeItem != "menu=make_item" {
-		if *botName == "bot_username" {
-			directoryName, err := CurrentDirectoryProjectName()
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			botName = directoryName
+	if *botName == "bot_username" {
+		directoryName, err := CurrentDirectoryProjectName()
+		if err != nil {
+			fmt.Println(err)
+			return
 		}
-
-		if strings.Contains(*makeItem, "menu") {
+		botName = directoryName
+	}
+	if *makeItem != "make=make_item" {
+		if strings.Index(*makeItem, "menu") == 0 {
 			split := strings.Split(*makeItem, ":")
 			line := 0
 			if len(split) == 3 {
@@ -68,6 +69,7 @@ func main() {
 					line = lineInt
 				}
 			}
+
 			err := CreateMenuForBot(*botName, split[1], line)
 			if err != nil {
 				fmt.Println(err)
@@ -75,7 +77,7 @@ func main() {
 				fmt.Println(fmt.Sprintf("New Menu %s Added to %s Bot", split[1], *botName))
 			}
 			return
-		} else if strings.Contains(*makeItem, "model") {
+		} else if strings.Index(*makeItem, "model") == 0{
 			split := strings.Split(*makeItem, ":")
 			err := CreateModelForBot(*botName, split[2], split[3], split[4])
 			if err != nil {
@@ -84,19 +86,98 @@ func main() {
 				fmt.Println(fmt.Sprintf("New Model %s Added to %s Bot", split[1], *botName))
 			}
 			return
+		} else if strings.Index(*makeItem, "inline_menu") == 0 {
+			split := strings.Split(*makeItem, ":")
+			line := 0
+			menuType := "simple"
+			if len(split) == 3 {
+				lineInt, err := strconv.Atoi(split[2])
+				if err == nil {
+					line = lineInt
+				}
+			} else if len(split) == 4 {
+				lineInt, err := strconv.Atoi(split[2])
+				if err == nil {
+					line = lineInt
+				}
+				menuType = split[3]
+			}
+
+			err := CreateInlineMenuForBot(*botName, split[1], line, menuType)
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Println(fmt.Sprintf("New Menu %s Added to %s Bot", split[1], *botName))
+			}
+			return
+		}
+	}
+	if *addItem != "add=item" {
+		split := strings.Split(*addItem, ":")
+		if len(split) != 2 {
+			fmt.Println("wrong_command")
+			return
+		}
+		if split[0] == "text" {
+			AddTextToLanguage(*botName, split[1])
+			return
 		}
 	}
 	if *projectType == "bot" {
-		CreateBotProject(*botName, *botToken)
+		watchers := true
+		if *goland_watchers != "1" {
+			watchers = false
+		}
+		CreateBotProject(*botName, *botToken, watchers)
 	} else {
 		fmt.Println("Project is not supported yet!")
 	}
 }
 
+func AddTextToLanguage(username, textTitle string)  error {
+	interfacePath := ProjectPath(username) + "lang/language.go"
+	persianPath := ProjectPath(username) + "lang/persian.go"
+	englishPath := ProjectPath(username) + "lang/english.go"
+	textBytes, _ := file.FileGetContents(TemplatePath() + "/bot/add/text.tmp")
+	textContent := string(textBytes)
+	textContent = strings.Replace(textContent, "%TITLE%", textTitle, -1)
+	textContentInterface := textContent[strings.Index(textContent, "%INTERFACE%") + len("%INTERFACE%") : strings.Index(textContent, "%/INTERFACE%")]
+	textContentPersian := textContent[strings.Index(textContent, "%ENGLISH%") + len("%ENGLISH%"):strings.Index(textContent, "%/ENGLISH%")]
+	textContentEnglish := textContent[strings.Index(textContent, "%PERSIAN%") + len("%PERSIAN%"):strings.Index(textContent, "%/PERSIAN%")]
+	interfaceBytes, err := file.FileGetContents(interfacePath)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	englishBytes, err :=file.FileGetContents(englishPath)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	persianBytes, err :=file.FileGetContents(persianPath)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	interfaceContent := string(interfaceBytes)
+	persianContent := string(persianBytes)
+	englishContent := string(englishBytes)
+	interfaceEndBracketIndex := strings.LastIndex(interfaceContent, "}")
+	interfaceContent = interfaceContent[:interfaceEndBracketIndex] + textContentInterface + "}"
+	persianContent += "\n" + textContentPersian
+	englishContent += "\n" + textContentEnglish
+	file.FilePutContents(interfacePath, []byte(interfaceContent))
+	file.FilePutContents(persianPath, []byte(persianContent))
+	file.FilePutContents(englishPath, []byte(englishContent))
+	exec.Command("go fmt ", "-w", ProjectPath(username)).Output()
+	exec.Command("goimports", "-w", ProjectPath(username)).Output()
+	return nil
+}
+
 func CreateModelForBot(username, modelFileName, modelStructName, modelTableName string) error {
 	modelsPath := ProjectPath(username) + "models/"
 	modelShortName := ""
-	fmt.Println(modelStructName)
+
 	for _, char := range  modelStructName {
 		if !unicode.IsLower(char) {
 			modelShortName += strings.ToLower(string(char))
@@ -116,6 +197,69 @@ func CreateModelForBot(username, modelFileName, modelStructName, modelTableName 
 	exec.Command("go fmt ", "-w", ProjectPath(username)).Output()
 	exec.Command("goimports", "-w", ProjectPath(username)).Output()
 	return nil
+}
+
+func CreateInlineMenuForBot(username, menuName string, line int, menuType string) error {
+	enginePath := ProjectPath(username) + "funcs/engine.go"
+	interfacePath := ProjectPath(username) + "lang/language.go"
+	persianPath := ProjectPath(username) + "lang/persian.go"
+	englishPath := ProjectPath(username) + "lang/english.go"
+	menuByte, err := file.FileGetContents(TemplatePath() + "/bot/inline_menu.temp")
+	if err != nil {
+		return err
+	}
+	fileContent := string(menuByte)
+	if menuType == "simple" {
+		idx := strings.Index(fileContent, "%SIMPLES_INLINE_MENU%") + len("%SIMPLES_INLINE_MENU%")
+		endIdx := strings.Index(fileContent, "%/SIMPLES_INLINE_MENU%")
+		content := fileContent[idx:endIdx]
+		menu := strings.Replace(content, "%INLINE_MENU%", menuName, -1)
+		menu = strings.Replace(menu, "%BOTUSERNAME_CAPS%", strings.ToUpper(username), -1)
+		split := strings.Split(menu, "@language")
+		menu = split[0]
+		langParts := split[1]
+		split = strings.Split(langParts, "--")
+		langInterface := split[0]
+		persian := split[1]
+		english := split[2]
+		currentInterfaceBytes, err := file.FileGetContents(interfacePath)
+		currentPersianBytes, err := file.FileGetContents(persianPath)
+		currentEnglishBytes, err := file.FileGetContents(englishPath)
+		currentEngineBytes, err := file.FileGetContents(enginePath)
+		if err != nil {
+			return err
+		}
+		lastBracketIndex := strings.LastIndex(string(currentInterfaceBytes), "}")
+		newInterfaceBytes := []byte((string(currentInterfaceBytes)[:lastBracketIndex-1] + langInterface + string(currentInterfaceBytes[lastBracketIndex:])))
+		newPersianBytes := []byte((string(currentPersianBytes)  + persian))
+		newEnglishBytes := []byte((string(currentEnglishBytes)  + english))
+		file.FilePutContents(interfacePath, newInterfaceBytes)
+		file.FilePutContents(persianPath, newPersianBytes)
+		file.FilePutContents(englishPath, newEnglishBytes)
+		var newEngineBytes []byte
+		if line == 0 {
+			newEngineBytes = []byte((string(currentEngineBytes) + "\n" + menu))
+		} else {
+			split := strings.Split(string(currentEngineBytes), "\n")
+
+			if len(split) < line {
+				newEngineBytes = []byte((string(currentEngineBytes) + "\n" + menu))
+			} else {
+				for i := range split {
+					if i+1 == line {
+						engine := strings.Join(split[:i+1], "\n") + "\n" + menu + "\n" + strings.Join(split[i+1:], "\n")
+						newEngineBytes = []byte(engine)
+						break
+					}
+				}
+			}
+		}
+		file.FilePutContents(enginePath, newEngineBytes)
+		exec.Command("go fmt ", "-w", ProjectPath(username)).Output()
+		exec.Command("goimports", "-w", ProjectPath(username)).Output()
+		return nil
+	}
+	return errors.New("type_unknown")
 }
 
 func CreateMenuForBot(username, menuName string, line int) error {
@@ -174,10 +318,15 @@ func CreateMenuForBot(username, menuName string, line int) error {
 	return nil
 }
 
-func CreateBotProject(username, token string) {
+func CreateBotProject(username, token string, addIdeaWatchers bool) {
 	goPath := os.Getenv("GOPATH") + "/src/"
 	currentPath := goPath + "goproj/"
 	goSourcePath := goPath + username
+	if addIdeaWatchers {
+		os.Mkdir(goSourcePath + "/.idea", os.ModePerm)
+		content, _ := file.FileGetContents(currentPath + "templates/bot/watcherTasks.xml")
+		file.FilePutContents(goSourcePath + "/.idea/" + "watcherTasks.xml", content)
+	}
 	apiBytes, _ := file.FileGetContents(currentPath + "templates/bot/api.temp")
 	databaseBytes, _ := file.FileGetContents(currentPath + "templates/bot/database.temp")
 	keyboardsBytes, _ := file.FileGetContents(currentPath + "templates/bot/keyboards.temp")

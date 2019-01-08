@@ -1,0 +1,54 @@
+%SIMPLES_INLINE_MENU%
+func (bot *%BOTUSERNAME_CAPS%) %INLINE_MENU%InlineKeyboard() *tgbotapi.InlineKeyboardMarkup {
+	var rows [][]map[string]string
+
+	rows = append(rows, []map[string]string{
+		{"text": "Default", "data":"default:default"},
+	})
+
+	return MakeInlineReplyKeyboardFromArray(rows)
+}
+
+@language
+%INLINE_MENU%InlineKeyboardBtn() string
+--
+func (p *Persian) %INLINE_MENU%InlineKeyboardBtn() string {
+	return "پیشفرض"
+}
+--
+func (e *English) %INLINE_MENU%InlineKeyboardBtn() string {
+	return "Default"
+}
+%/SIMPLES_INLINE_MENU%
+
+%LIST_INLINE_MENU%
+func (bot *%BOTUSERNAME_CAPS%) %INLINE_MENU%InlineKeyboard() *tgbotapi.InlineKeyboardMarkup {
+	var rows [][]map[string]string
+
+	rows = append(rows, []map[string]string{
+		{"text": bot.Language.NextBtn(), "data":"show_item:next_id"},
+		{"text": bot.Language.PreviousBtn(), "data":"show_item:previous_id"},
+	})
+
+	return MakeInlineReplyKeyboardFromArray(rows)
+}
+@language
+NextBtn() string
+PreviousBtn() string
+--
+func (p *Persian) NextBtn() string {
+	return "◀️"
+}
+
+func (p *Persian) PreviousBtn() string {
+	return "▶️"
+}
+--
+func (e *English) NextBtn() string {
+	return "◀️"
+}
+
+func (e *English) PreviousBtn() string {
+	return "▶️"
+}
+%/LIST_INLINE_MENU%
