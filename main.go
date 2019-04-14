@@ -1,27 +1,27 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
-	"goproj/file"
+	"github.com/aliforever/goproj/file"
 	"os"
-	"strings"
 	"os/exec"
 	"strconv"
-	"errors"
+	"strings"
 	"unicode"
-	)
+)
 
 func GoPATH() string {
-	return  os.Getenv("GOPATH") + "/src/"
+	return os.Getenv("GOPATH") + "/src/"
 }
 
 func TemplatePath() string {
 	return GoPATH() + "goproj/templates"
 }
 
-func ProjectPath(name string)  string {
-	return  GoPATH() + name + "/"
+func ProjectPath(name string) string {
+	return GoPATH() + name + "/"
 }
 
 func CurrentDirectoryProjectName() (directory *string, err error) {
@@ -77,7 +77,7 @@ func main() {
 				fmt.Println(fmt.Sprintf("New Menu %s Added to %s Bot", split[1], *botName))
 			}
 			return
-		} else if strings.Index(*makeItem, "model") == 0{
+		} else if strings.Index(*makeItem, "model") == 0 {
 			split := strings.Split(*makeItem, ":")
 			err := CreateModelForBot(*botName, split[2], split[3], split[4])
 			if err != nil {
@@ -134,27 +134,27 @@ func main() {
 	}
 }
 
-func AddTextToLanguage(username, textTitle string)  error {
+func AddTextToLanguage(username, textTitle string) error {
 	interfacePath := ProjectPath(username) + "lang/language.go"
 	persianPath := ProjectPath(username) + "lang/persian.go"
 	englishPath := ProjectPath(username) + "lang/english.go"
 	textBytes, _ := file.FileGetContents(TemplatePath() + "/bot/add/text.tmp")
 	textContent := string(textBytes)
 	textContent = strings.Replace(textContent, "%TITLE%", textTitle, -1)
-	textContentInterface := textContent[strings.Index(textContent, "%INTERFACE%") + len("%INTERFACE%") : strings.Index(textContent, "%/INTERFACE%")]
-	textContentEnglish := textContent[strings.Index(textContent, "%ENGLISH%") + len("%ENGLISH%"):strings.Index(textContent, "%/ENGLISH%")]
-	textContentPersian := textContent[strings.Index(textContent, "%PERSIAN%") + len("%PERSIAN%"):strings.Index(textContent, "%/PERSIAN%")]
+	textContentInterface := textContent[strings.Index(textContent, "%INTERFACE%")+len("%INTERFACE%") : strings.Index(textContent, "%/INTERFACE%")]
+	textContentEnglish := textContent[strings.Index(textContent, "%ENGLISH%")+len("%ENGLISH%") : strings.Index(textContent, "%/ENGLISH%")]
+	textContentPersian := textContent[strings.Index(textContent, "%PERSIAN%")+len("%PERSIAN%") : strings.Index(textContent, "%/PERSIAN%")]
 	interfaceBytes, err := file.FileGetContents(interfacePath)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
-	englishBytes, err :=file.FileGetContents(englishPath)
+	englishBytes, err := file.FileGetContents(englishPath)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
-	persianBytes, err :=file.FileGetContents(persianPath)
+	persianBytes, err := file.FileGetContents(persianPath)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -178,7 +178,7 @@ func CreateModelForBot(username, modelFileName, modelStructName, modelTableName 
 	modelsPath := ProjectPath(username) + "models/"
 	modelShortName := ""
 
-	for _, char := range  modelStructName {
+	for _, char := range modelStructName {
 		if !unicode.IsLower(char) {
 			modelShortName += strings.ToLower(string(char))
 		}
@@ -187,10 +187,10 @@ func CreateModelForBot(username, modelFileName, modelStructName, modelTableName 
 	if err != nil {
 		return err
 	}
-	model := strings.Replace(string(modelBytes), "%MODEL_STRUCT_NAME%",modelStructName, -1)
-	model = strings.Replace(model, "%MODEL_SHORT_NAME%",modelShortName, -1)
-	model = strings.Replace(model, "%MODEL_TABLE_NAME%",modelTableName, -1)
-	err = file.FilePutContents(modelsPath + modelFileName + ".go", []byte(model))
+	model := strings.Replace(string(modelBytes), "%MODEL_STRUCT_NAME%", modelStructName, -1)
+	model = strings.Replace(model, "%MODEL_SHORT_NAME%", modelShortName, -1)
+	model = strings.Replace(model, "%MODEL_TABLE_NAME%", modelTableName, -1)
+	err = file.FilePutContents(modelsPath+modelFileName+".go", []byte(model))
 	if err != nil {
 		return err
 	}
@@ -231,8 +231,8 @@ func CreateInlineMenuForBot(username, menuName string, line int, menuType string
 		}
 		lastBracketIndex := strings.LastIndex(string(currentInterfaceBytes), "}")
 		newInterfaceBytes := []byte((string(currentInterfaceBytes)[:lastBracketIndex-1] + langInterface + string(currentInterfaceBytes[lastBracketIndex:])))
-		newPersianBytes := []byte((string(currentPersianBytes)  + persian))
-		newEnglishBytes := []byte((string(currentEnglishBytes)  + english))
+		newPersianBytes := []byte((string(currentPersianBytes) + persian))
+		newEnglishBytes := []byte((string(currentEnglishBytes) + english))
 		file.FilePutContents(interfacePath, newInterfaceBytes)
 		file.FilePutContents(persianPath, newPersianBytes)
 		file.FilePutContents(englishPath, newEnglishBytes)
@@ -289,8 +289,8 @@ func CreateMenuForBot(username, menuName string, line int) error {
 	}
 	lastBracketIndex := strings.LastIndex(string(currentInterfaceBytes), "}")
 	newInterfaceBytes := []byte((string(currentInterfaceBytes)[:lastBracketIndex-1] + langInterface + string(currentInterfaceBytes[lastBracketIndex:])))
-	newPersianBytes := []byte((string(currentPersianBytes)  + persian))
-	newEnglishBytes := []byte((string(currentEnglishBytes)  + english))
+	newPersianBytes := []byte((string(currentPersianBytes) + persian))
+	newEnglishBytes := []byte((string(currentEnglishBytes) + english))
 	file.FilePutContents(interfacePath, newInterfaceBytes)
 	file.FilePutContents(persianPath, newPersianBytes)
 	file.FilePutContents(englishPath, newEnglishBytes)
@@ -323,9 +323,9 @@ func CreateBotProject(username, token string, addIdeaWatchers bool) {
 	currentPath := goPath + "goproj/"
 	goSourcePath := goPath + username
 	if addIdeaWatchers {
-		os.Mkdir(goSourcePath + "/.idea", os.ModePerm)
+		os.Mkdir(goSourcePath+"/.idea", os.ModePerm)
 		content, _ := file.FileGetContents(currentPath + "templates/bot/watcherTasks.xml")
-		file.FilePutContents(goSourcePath + "/.idea/" + "watcherTasks.xml", content)
+		file.FilePutContents(goSourcePath+"/.idea/"+"watcherTasks.xml", content)
 	}
 	apiBytes, _ := file.FileGetContents(currentPath + "templates/bot/api.temp")
 	databaseBytes, _ := file.FileGetContents(currentPath + "templates/bot/database.temp")
@@ -353,24 +353,24 @@ func CreateBotProject(username, token string, addIdeaWatchers bool) {
 	langPath := goSourcePath + "/lang/"
 	modelPath := goSourcePath + "/models/"
 	os.Mkdir(goSourcePath, os.ModePerm)
-	os.Mkdir(goSourcePath + "/configs/", os.ModePerm)
-	os.Mkdir(goSourcePath + "/funcs/", os.ModePerm)
-	os.Mkdir(goSourcePath + "/lang/", os.ModePerm)
-	os.Mkdir(goSourcePath + "/models/", os.ModePerm)
-	if err := file.FilePutContents(configPath + "main.go", configBytes); err != nil {
+	os.Mkdir(goSourcePath+"/configs/", os.ModePerm)
+	os.Mkdir(goSourcePath+"/funcs/", os.ModePerm)
+	os.Mkdir(goSourcePath+"/lang/", os.ModePerm)
+	os.Mkdir(goSourcePath+"/models/", os.ModePerm)
+	if err := file.FilePutContents(configPath+"main.go", configBytes); err != nil {
 		fmt.Println(err)
 		return
 	}
-	file.FilePutContents(funcsPath + "engine.go", engineBytes)
-	file.FilePutContents(funcsPath + "methods.go", methodsBytes)
-	file.FilePutContents(funcsPath + "keyboards.go", keyboardsBytes)
-	file.FilePutContents(modelPath + "api.go", apiBytes)
-	file.FilePutContents(modelPath + "database.go", databaseBytes)
-	file.FilePutContents(modelPath + "user.go", userBytes)
-	file.FilePutContents(langPath + "language.go", languageBytes)
-	file.FilePutContents(langPath + "persian.go", persianBytes)
-	file.FilePutContents(langPath + "english.go", englishBytes)
-	file.FilePutContents(goSourcePath + "/main.go", mainBytes)
+	file.FilePutContents(funcsPath+"engine.go", engineBytes)
+	file.FilePutContents(funcsPath+"methods.go", methodsBytes)
+	file.FilePutContents(funcsPath+"keyboards.go", keyboardsBytes)
+	file.FilePutContents(modelPath+"api.go", apiBytes)
+	file.FilePutContents(modelPath+"database.go", databaseBytes)
+	file.FilePutContents(modelPath+"user.go", userBytes)
+	file.FilePutContents(langPath+"language.go", languageBytes)
+	file.FilePutContents(langPath+"persian.go", persianBytes)
+	file.FilePutContents(langPath+"english.go", englishBytes)
+	file.FilePutContents(goSourcePath+"/main.go", mainBytes)
 	exec.Command("go fmt ", "-w", goSourcePath).Output()
 	exec.Command("goimports", "-w", goSourcePath).Output()
 	fmt.Println(fmt.Sprintf("Bot %s Created at %s", username, goSourcePath))
