@@ -17,7 +17,7 @@ func GoPATH() string {
 }
 
 func TemplatePath() string {
-	return GoPATH() + "goproj/templates"
+	return GoPATH() + "github.com/aliforever/goproj/templates"
 }
 
 func ProjectPath(name string) string {
