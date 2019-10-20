@@ -49,7 +49,7 @@ func main() {
 	botToken := flag.String("token", "bot_token", "Enter Bot Token")
 	makeItem := flag.String("make", "make=make_item", "Enter Make Item")
 	addItem := flag.String("add", "add=item", "Enter Add Item")
-	goland_watchers := flag.String("goland_watchers", "1", "Should it enable go fmt and goimports ")
+	golandWatchers := flag.String("golandWatchers", "1", "Should it enable go fmt and goimports ")
 	flag.Parse()
 	if *botName == "bot_username" {
 		directoryName, err := CurrentDirectoryProjectName()
@@ -125,7 +125,7 @@ func main() {
 	}
 	if *projectType == "bot" {
 		watchers := true
-		if *goland_watchers != "1" {
+		if *golandWatchers != "1" {
 			watchers = false
 		}
 		CreateBotProject(*botName, *botToken, watchers)
@@ -142,6 +142,7 @@ func AddTextToLanguage(username, textTitle string) error {
 	textContent := string(textBytes)
 	textContent = strings.Replace(textContent, "%TITLE%", textTitle, -1)
 	textContentInterface := textContent[strings.Index(textContent, "%INTERFACE%")+len("%INTERFACE%") : strings.Index(textContent, "%/INTERFACE%")]
+	textContentInterface = strings.Replace(textContentInterface, "\n", "", -1)
 	textContentEnglish := textContent[strings.Index(textContent, "%ENGLISH%")+len("%ENGLISH%") : strings.Index(textContent, "%/ENGLISH%")]
 	textContentPersian := textContent[strings.Index(textContent, "%PERSIAN%")+len("%PERSIAN%") : strings.Index(textContent, "%/PERSIAN%")]
 	interfaceBytes, err := file.FileGetContents(interfacePath)
@@ -320,33 +321,33 @@ func CreateMenuForBot(username, menuName string, line int) error {
 
 func CreateBotProject(username, token string, addIdeaWatchers bool) {
 	goPath := os.Getenv("GOPATH") + "/src/"
-	currentPath := goPath + "goproj/"
 	goSourcePath := goPath + username
 	if addIdeaWatchers {
 		os.Mkdir(goSourcePath+"/.idea", os.ModePerm)
-		content, _ := file.FileGetContents(currentPath + "templates/bot/watcherTasks.xml")
+		content, _ := file.FileGetContents(TemplatePath() + "/bot/watcherTasks.xml")
 		file.FilePutContents(goSourcePath+"/.idea/"+"watcherTasks.xml", content)
 	}
-	apiBytes, _ := file.FileGetContents(currentPath + "templates/bot/api.temp")
-	databaseBytes, _ := file.FileGetContents(currentPath + "templates/bot/database.temp")
-	keyboardsBytes, _ := file.FileGetContents(currentPath + "templates/bot/keyboards.temp")
+	apiBytes, _ := file.FileGetContents(TemplatePath() + "/bot/api.temp")
+
+	databaseBytes, _ := file.FileGetContents(TemplatePath() + "/bot/database.temp")
+	keyboardsBytes, _ := file.FileGetContents(TemplatePath() + "/bot/keyboards.temp")
 	keyboardsBytes = []byte(strings.Replace(string(keyboardsBytes), "%BOTUSERNAME%", username, -1))
-	languageBytes, _ := file.FileGetContents(currentPath + "templates/bot/language.temp")
-	engineBytes, _ := file.FileGetContents(currentPath + "templates/bot/engine.temp") // %BOTUSERNAME% %BOTUSERNAME_CAPS%
+	languageBytes, _ := file.FileGetContents(TemplatePath() + "/bot/language.temp")
+	engineBytes, _ := file.FileGetContents(TemplatePath() + "/bot/engine.temp") // %BOTUSERNAME% %BOTUSERNAME_CAPS%
 	engineBytes = []byte(strings.Replace(string(engineBytes), "%BOTUSERNAME%", username, -1))
 	engineBytes = []byte(strings.Replace(string(engineBytes), "%BOTUSERNAME_CAPS%", strings.ToUpper(username), -1))
-	methodsBytes, _ := file.FileGetContents(currentPath + "templates/bot/methods.temp") // %BOTUSERNAME% %BOTUSERNAME_CAPS%
+	methodsBytes, _ := file.FileGetContents(TemplatePath() + "/bot/methods.temp") // %BOTUSERNAME% %BOTUSERNAME_CAPS%
 	methodsBytes = []byte(strings.Replace(string(methodsBytes), "%BOTUSERNAME%", username, -1))
 	methodsBytes = []byte(strings.Replace(string(methodsBytes), "%BOTUSERNAME_CAPS%", strings.ToUpper(username), -1))
-	configBytes, _ := file.FileGetContents(currentPath + "templates/bot/config.temp") // %BOTUSERNAME% %BOTTOKEN%
+	configBytes, _ := file.FileGetContents(TemplatePath() + "/bot/config.temp") // %BOTUSERNAME% %BOTTOKEN%
 	configBytes = []byte(strings.Replace(string(configBytes), "%BOTUSERNAME%", username, -1))
 	configBytes = []byte(strings.Replace(string(configBytes), "%BOTTOKEN%", token, -1))
-	mainBytes, _ := file.FileGetContents(currentPath + "templates/bot/main.temp") // %BOTUSERNAME%
+	mainBytes, _ := file.FileGetContents(TemplatePath() + "/bot/main.temp") // %BOTUSERNAME%
 	mainBytes = []byte(strings.Replace(string(mainBytes), "%BOTUSERNAME%", username, -1))
 	mainBytes = []byte(strings.Replace(string(mainBytes), "%BOTUSERNAME_CAPS%", strings.ToUpper(username), -1))
-	userBytes, _ := file.FileGetContents(currentPath + "templates/bot/user.temp")
-	persianBytes, _ := file.FileGetContents(currentPath + "templates/bot/persian.temp")
-	englishBytes, _ := file.FileGetContents(currentPath + "templates/bot/english.temp")
+	userBytes, _ := file.FileGetContents(TemplatePath() + "/bot/user.temp")
+	persianBytes, _ := file.FileGetContents(TemplatePath() + "/bot/persian.temp")
+	englishBytes, _ := file.FileGetContents(TemplatePath() + "/bot/english.temp")
 
 	configPath := goSourcePath + "/configs/"
 	funcsPath := goSourcePath + "/funcs/"
